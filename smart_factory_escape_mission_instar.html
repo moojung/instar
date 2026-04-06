@@ -1,0 +1,348 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.game-wrap { padding: 1.5rem 1rem; max-width: 600px; margin: 0 auto; }
+.screen { display: none; }
+.screen.active { display: block; }
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--border-radius-md);
+  background: var(--color-background-info);
+  color: var(--color-text-info);
+  margin-bottom: 12px;
+}
+.title-block { margin-bottom: 1.5rem; }
+.title-block h1 { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+.title-block p { font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; }
+.factory-icon {
+  width: 72px; height: 72px;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin-bottom: 1rem;
+}
+.booth-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500;
+  color: var(--color-text-secondary);
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  padding: 4px 10px;
+  margin-bottom: 1.25rem;
+}
+.booth-tag .team { color: var(--color-text-info); font-weight: 500; }
+.start-btn, .choice-btn, .next-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--border-radius-lg);
+  border: 0.5px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-size: 15px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  margin-bottom: 8px;
+  font-family: var(--font-sans);
+}
+.start-btn { text-align: center; font-weight: 500; }
+.start-btn:hover, .next-btn:hover { background: var(--color-background-secondary); }
+.choice-btn:hover { background: var(--color-background-secondary); }
+.choice-btn.correct { background: var(--color-background-success); border-color: var(--color-border-success); color: var(--color-text-success); }
+.choice-btn.wrong { background: var(--color-background-danger); border-color: var(--color-border-danger); color: var(--color-text-danger); }
+.choice-btn:disabled { cursor: default; }
+.progress-bar-wrap {
+  background: var(--color-background-secondary);
+  border-radius: 99px;
+  height: 6px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--color-text-info);
+  border-radius: 99px;
+  transition: width 0.4s;
+}
+.q-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 8px; }
+.q-scenario {
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.q-scenario .q-situation { font-size: 12px; color: var(--color-text-info); font-weight: 500; margin-bottom: 6px; }
+.q-scenario h2 { font-size: 16px; font-weight: 500; color: var(--color-text-primary); line-height: 1.5; }
+.feedback-box {
+  border-radius: var(--border-radius-lg);
+  padding: 12px 16px;
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  display: none;
+}
+.feedback-box.correct { background: var(--color-background-success); color: var(--color-text-success); border: 0.5px solid var(--color-border-success); }
+.feedback-box.wrong { background: var(--color-background-danger); color: var(--color-text-danger); border: 0.5px solid var(--color-border-danger); }
+.result-wrap { text-align: center; }
+.score-circle {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+.score-circle .score-num { font-size: 28px; font-weight: 500; color: var(--color-text-primary); }
+.score-circle .score-denom { font-size: 13px; color: var(--color-text-secondary); }
+.result-title { font-size: 20px; font-weight: 500; margin-bottom: 8px; color: var(--color-text-primary); }
+.result-desc { font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 1.5rem; }
+.stamp-box {
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+.stamp-box .stamp-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.stamp-box .stamp-code { font-size: 22px; font-weight: 500; letter-spacing: 4px; color: var(--color-text-primary); font-family: var(--font-mono); }
+.stamp-box .stamp-booth { font-size: 11px; color: var(--color-text-info); margin-top: 6px; }
+.restart-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--border-radius-lg);
+  border: 0.5px solid var(--color-border-secondary);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+.restart-btn:hover { background: var(--color-background-secondary); }
+.divider { height: 0.5px; background: var(--color-border-tertiary); margin: 1rem 0; }
+</style>
+
+<div class="game-wrap">
+
+  <!-- INTRO -->
+  <div class="screen active" id="screen-intro">
+    <div class="factory-icon">🏭</div>
+    <div class="booth-tag">
+      <span class="team">I팀 InStar</span>
+      <span>·</span>
+      <span>스마트공장 CSR Fair</span>
+    </div>
+    <div class="badge">스마트공장 탈출 미션</div>
+    <div class="title-block">
+      <h1>공장 비상사태 발생!</h1>
+      <p>스마트공장 시스템에 문제가 생겼습니다.<br>총 5개의 미션을 해결하고 공장을 정상화하세요!</p>
+    </div>
+    <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 1.5rem; line-height: 1.7;">
+      각 문제를 풀어 정답을 맞히면 비밀 코드를 획득합니다.<br>
+      완료 후 <strong>I팀 InStar 담당자</strong>에게 화면을 보여주세요.
+    </div>
+    <button class="start-btn" onclick="startGame()">미션 시작하기</button>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="screen" id="screen-question">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+    </div>
+    <div class="q-label" id="q-label">미션 1 / 5</div>
+    <div class="q-scenario">
+      <div class="q-situation" id="q-situation"></div>
+      <h2 id="q-text"></h2>
+    </div>
+    <div id="choices"></div>
+    <div class="feedback-box" id="feedback-box"></div>
+    <div style="margin-top: 12px;">
+      <button class="next-btn" id="next-btn" style="display:none;" onclick="nextQuestion()">다음 미션 →</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result">
+    <div class="result-wrap">
+      <div class="score-circle">
+        <span class="score-num" id="result-score">0</span>
+        <span class="score-denom">/ 5</span>
+      </div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-desc" id="result-desc"></div>
+      <div class="divider"></div>
+      <div class="stamp-box">
+        <div class="stamp-label">미션 완료 코드 — I팀 InStar 담당자에게 이 화면을 보여주세요</div>
+        <div class="stamp-code" id="stamp-code"></div>
+        <div class="stamp-booth">I팀 InStar · 스마트공장 CSR Fair</div>
+      </div>
+      <button class="restart-btn" onclick="restartGame()">처음부터 다시 하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    situation: "미션 01 · 품질 이상 감지",
+    text: "생산 라인에서 불량품이 갑자기 증가하고 있습니다. 스마트공장에서 이를 실시간으로 잡아내는 핵심 기술은 무엇일까요?",
+    choices: [
+      "작업자가 직접 육안으로 검사한다",
+      "AI 비전 카메라로 자동 불량 감지",
+      "생산을 멈추고 전수 검사를 한다",
+      "불량이 나오면 고객에게 교환해준다"
+    ],
+    answer: 1,
+    feedback: "AI 비전 카메라는 초당 수백 장의 이미지를 분석해 0.1mm 단위 불량도 자동으로 잡아냅니다. 사람보다 100배 빠르고 피로도가 없습니다."
+  },
+  {
+    situation: "미션 02 · 설비 고장 예측",
+    text: "핵심 기계가 갑자기 멈추면 하루 수억 원의 손실이 납니다. 스마트공장에서 고장을 미리 예측하는 방법은?",
+    choices: [
+      "고장 날 때마다 빠르게 수리한다",
+      "매주 정해진 날에 점검한다",
+      "IoT 센서로 진동·온도를 실시간 모니터링",
+      "오래된 기계는 무조건 교체한다"
+    ],
+    answer: 2,
+    feedback: "IoT 센서가 설비의 진동·온도·소음 데이터를 24시간 수집하고, AI가 패턴을 분석해 고장 2주 전에 미리 알려줍니다. 이를 '예지보전(Predictive Maintenance)'이라고 해요."
+  },
+  {
+    situation: "미션 03 · 물류 최적화",
+    text: "창고 안에서 부품을 찾는 데 시간이 너무 오래 걸립니다. 스마트공장의 해결책은?",
+    choices: [
+      "직원들에게 창고 구조를 외우게 한다",
+      "부품마다 스티커 메모를 붙인다",
+      "AGV(자율주행 로봇)와 WMS 시스템 도입",
+      "창고를 더 크게 짓는다"
+    ],
+    answer: 2,
+    feedback: "AGV(자율주행 로봇)가 자동으로 부품을 찾아 이동시키고, WMS(창고관리시스템)가 재고 위치를 실시간으로 추적합니다. 찾는 시간이 90% 단축됩니다."
+  },
+  {
+    situation: "미션 04 · 에너지 절감",
+    text: "공장 전기요금이 급격히 올랐습니다. 스마트공장에서 에너지를 효율적으로 관리하는 방법은?",
+    choices: [
+      "모든 설비를 24시간 가동한다",
+      "에너지 사용량 데이터를 분석해 피크타임을 조절",
+      "전기를 아끼려고 조명을 다 끈다",
+      "태양광 패널만 설치하면 해결된다"
+    ],
+    answer: 1,
+    feedback: "EMS(에너지관리시스템)가 각 설비별 전력 사용량을 실시간으로 분석하고, 전기요금이 비싼 피크타임에는 비핵심 설비 가동을 자동으로 조절합니다. 평균 15~30% 절감 효과가 있습니다."
+  },
+  {
+    situation: "미션 05 · 디지털 트윈",
+    text: "신제품 생산 방식을 바꾸려는데, 실제 공장을 멈출 수는 없습니다. 스마트공장에서 이를 해결하는 최신 기술은?",
+    choices: [
+      "야간에 몰래 테스트해본다",
+      "다른 공장에서 먼저 해본다",
+      "디지털 트윈으로 가상 시뮬레이션 먼저 실행",
+      "경험 많은 직원의 감에 맡긴다"
+    ],
+    answer: 2,
+    feedback: "디지털 트윈(Digital Twin)은 실제 공장을 그대로 복제한 가상 모델입니다. 실제 생산을 멈추지 않고도 새로운 공정, 설비 배치, 생산 시나리오를 수백 번 시뮬레이션할 수 있습니다."
+  }
+];
+
+let current = 0, score = 0, answered = false;
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame() {
+  current = 0; score = 0;
+  loadQuestion();
+  show('screen-question');
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[current];
+  const total = questions.length;
+  document.getElementById('progress-bar').style.width = ((current / total) * 100) + '%';
+  document.getElementById('q-label').textContent = '미션 ' + (current + 1) + ' / ' + total;
+  document.getElementById('q-situation').textContent = q.situation;
+  document.getElementById('q-text').textContent = q.text;
+
+  const fb = document.getElementById('feedback-box');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.style.display = 'none';
+  nextBtn.textContent = current === total - 1 ? '결과 보기' : '다음 미션 →';
+
+  const choicesDiv = document.getElementById('choices');
+  choicesDiv.innerHTML = '';
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = (i + 1) + '. ' + c;
+    btn.onclick = () => selectAnswer(i);
+    choicesDiv.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const buttons = document.querySelectorAll('.choice-btn');
+  buttons.forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback-box');
+  if (idx === q.answer) {
+    score++;
+    buttons[idx].classList.add('correct');
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = '<strong>정답!</strong> ' + q.feedback;
+  } else {
+    buttons[idx].classList.add('wrong');
+    buttons[q.answer].classList.add('correct');
+    fb.className = 'feedback-box wrong';
+    fb.innerHTML = '<strong>아쉽네요!</strong> ' + q.feedback;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) showResult();
+  else loadQuestion();
+}
+
+function showResult() {
+  document.getElementById('progress-bar').style.width = '100%';
+  document.getElementById('result-score').textContent = score;
+  let title, desc, codeWord;
+  if (score === 5) {
+    title = "완벽한 스마트공장 엔지니어!";
+    desc = "5문제 모두 정답! 당신은 이미 스마트공장 전문가입니다. 모든 위기 상황을 완벽하게 해결했습니다.";
+    codeWord = "SF-MASTER";
+  } else if (score >= 3) {
+    title = "우수한 공장 운영 매니저!";
+    desc = "스마트공장의 핵심 개념을 잘 이해하고 있습니다. 조금만 더 배우면 완벽한 전문가가 될 수 있어요!";
+    codeWord = "SF-CLEAR";
+  } else {
+    title = "스마트공장 입문자!";
+    desc = "스마트공장의 세계에 첫 발을 내딛었습니다. 오늘 부스에서 더 많은 것을 배워가세요!";
+    codeWord = "SF-START";
+  }
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-desc').textContent = desc;
+  document.getElementById('stamp-code').textContent = codeWord;
+  show('screen-result');
+}
+
+function restartGame() { startGame(); }
+</script>
